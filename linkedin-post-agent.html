@@ -478,6 +478,8 @@ Je kunt me ook vragen om:
       addLoadingMessage();
 
       try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 120000);
         const response = await fetch(WEBHOOK_URL, {
           method: 'POST',
           headers: {
@@ -488,8 +490,10 @@ Je kunt me ook vragen om:
             action: 'sendMessage',
             sessionId: sessionId,
             chatInput: text
-          })
+          }),
+          signal: controller.signal
         });
+        clearTimeout(timeout);
 
         removeLoadingMessage();
 
