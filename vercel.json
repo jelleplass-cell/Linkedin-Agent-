@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/linkedin-post-agent.html" },
+    { "source": "/admin", "destination": "/admin.html" }
+  ]
+}
