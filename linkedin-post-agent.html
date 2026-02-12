@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LinkedIn Post Agent</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0a0a;
+      color: #fafafa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      text-align: center;
+      padding: 40px 20px 24px;
+      border-bottom: 1px solid #1a1a1a;
+    }
+
+    .header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #0077B5, #00a0dc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header p {
+      color: #888;
+      font-size: 0.95rem;
+    }
+
+    .chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      max-width: 800px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .message {
+      max-width: 85%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .message.assistant {
+      align-self: flex-start;
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      color: #e0e0e0;
+    }
+
+    .message.user {
+      align-self: flex-end;
+      background: #0077B5;
+      color: white;
+    }
+
+    .message.loading {
+      align-self: flex-start;
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      color: #888;
+    }
+
+    .message.loading .dots span {
+      animation: blink 1.4s infinite both;
+      font-size: 1.2rem;
+    }
+
+    .message.loading .dots span:nth-child(2) { animation-delay: 0.2s; }
+    .message.loading .dots span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes blink {
+      0%, 80%, 100% { opacity: 0.2; }
+      40% { opacity: 1; }
+    }
+
+    .input-area {
+      padding: 16px 0 24px;
+      border-top: 1px solid #1a1a1a;
+    }
+
+    .input-wrapper {
+      display: flex;
+      gap: 8px;
+      background: #141414;
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+      padding: 6px;
+      transition: border-color 0.2s;
+    }
+
+    .input-wrapper:focus-within {
+      border-color: #0077B5;
+    }
+
+    .input-wrapper textarea {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #fafafa;
+      font-family: inherit;
+      font-size: 0.9rem;
+      padding: 8px 12px;
+      resize: none;
+      max-height: 120px;
+      line-height: 1.5;
+    }
+
+    .input-wrapper textarea::placeholder {
+      color: #555;
+    }
+
+    .input-wrapper button {
+      align-self: flex-end;
+      background: #0077B5;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+
+    .input-wrapper button:hover:not(:disabled) {
+      background: #005f8f;
+    }
+
+    .input-wrapper button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 12px;
+      color: #444;
+      font-size: 0.75rem;
+    }
+
+    .footer a {
+      color: #0077B5;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>LinkedIn Post Agent</h1>
+    <p>Schrijf engaging LinkedIn posts in jouw stijl met AI</p>
+  </div>
+
+  <div class="chat-container">
+    <div class="messages" id="messages">
+      <div class="message assistant">Hallo! Ik ben je LinkedIn Post Agent. Vertel me waar je een post over wilt schrijven, en ik maak een engaging LinkedIn post in jouw stijl.
+
+Je kunt me ook vragen om:
+- Een post te herschrijven in een andere toon
+- Meerdere hook-varianten te genereren
+- Een post korter of langer te maken</div>
+    </div>
+
+    <div class="input-area">
+      <div class="input-wrapper">
+        <textarea
+          id="userInput"
+          rows="1"
+          placeholder="Waar wil je een LinkedIn post over schrijven?"
+          onkeydown="handleKeyDown(event)"
+          oninput="autoResize(this)"
+        ></textarea>
+        <button id="sendBtn" onclick="sendMessage()">Verstuur</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Powered by Claude &middot; <a href="#" id="uploadLink">Documenten uploaden</a>
+  </div>
+
+  <script>
+    // ============================================================
+    // CONFIGURATIE — Pas deze URL aan na het activeren van je n8n workflow
+    // ============================================================
+    const WEBHOOK_URL = 'https://jellep.app.n8n.cloud/webhook/linkedin-chat/chat';
+
+    // Form trigger URL voor document uploads
+    const UPLOAD_URL = 'https://jellep.app.n8n.cloud/form/linkedin-upload';
+    // ============================================================
+
+    let sessionId = crypto.randomUUID();
+    let isLoading = false;
+
+    // Set upload link
+    document.getElementById('uploadLink').href = UPLOAD_URL;
+
+    function autoResize(textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+    }
+
+    function handleKeyDown(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    }
+
+    function addMessage(text, role) {
+      const messages = document.getElementById('messages');
+      const div = document.createElement('div');
+      div.className = `message ${role}`;
+      div.textContent = text;
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+      return div;
+    }
+
+    function addLoadingMessage() {
+      const messages = document.getElementById('messages');
+      const div = document.createElement('div');
+      div.className = 'message loading';
+      div.id = 'loadingMsg';
+      div.innerHTML = '<div class="dots"><span>.</span><span>.</span><span>.</span></div>';
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function removeLoadingMessage() {
+      const el = document.getElementById('loadingMsg');
+      if (el) el.remove();
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById('userInput');
+      const btn = document.getElementById('sendBtn');
+      const text = input.value.trim();
+
+      if (!text || isLoading) return;
+
+      // Add user message
+      addMessage(text, 'user');
+      input.value = '';
+      input.style.height = 'auto';
+
+      // Disable input
+      isLoading = true;
+      btn.disabled = true;
+
+      // Show loading
+      addLoadingMessage();
+
+      try {
+        const response = await fetch(WEBHOOK_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Instance-Id': '199b622c8e07e226d2d4914886cad47691e2f56e4e1d2b49d8d0a6fca67cb084'
+          },
+          body: JSON.stringify({
+            action: 'sendMessage',
+            sessionId: sessionId,
+            chatInput: text
+          })
+        });
+
+        removeLoadingMessage();
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // n8n chat trigger returns the response in the 'output' field
+        const reply = data.output || data.text || data.response || JSON.stringify(data);
+        addMessage(reply, 'assistant');
+
+      } catch (error) {
+        removeLoadingMessage();
+        addMessage('Er ging iets mis. Controleer of de webhook URL correct is en de workflow actief is.', 'assistant');
+        console.error('Chat error:', error);
+      }
+
+      // Re-enable input
+      isLoading = false;
+      btn.disabled = false;
+      input.focus();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LinkedIn Post Agent — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #0a0a0a;
+      color: #fafafa;
+      min-height: 100vh;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 32px;
+      border-bottom: 1px solid #1a1a1a;
+    }
+
+    .header h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .header .links {
+      display: flex;
+      gap: 16px;
+    }
+
+    .header .links a {
+      color: #0077B5;
+      text-decoration: none;
+      font-size: 0.85rem;
+    }
+
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #1a1a1a;
+      padding: 0 32px;
+    }
+
+    .tab {
+      padding: 14px 24px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #666;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .tab:hover { color: #aaa; }
+    .tab.active {
+      color: #0077B5;
+      border-bottom-color: #0077B5;
+    }
+
+    .content {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 32px;
+    }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .panel h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .panel p.description {
+      color: #888;
+      font-size: 0.85rem;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 400px;
+      background: #141414;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      color: #e0e0e0;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 0.85rem;
+      padding: 16px;
+      line-height: 1.6;
+      resize: vertical;
+      outline: none;
+    }
+
+    textarea:focus { border-color: #0077B5; }
+
+    .save-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+
+    .save-bar .status {
+      font-size: 0.8rem;
+      color: #666;
+    }
+
+    .save-bar .status.saved { color: #4caf50; }
+    .save-bar .status.saving { color: #ff9800; }
+    .save-bar .status.error { color: #f44336; }
+
+    .btn {
+      background: #0077B5;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 24px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn:hover { background: #005f8f; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-danger {
+      background: #333;
+      color: #f44336;
+    }
+    .btn-danger:hover { background: #442222; }
+
+    .btn-small {
+      padding: 6px 14px;
+      font-size: 0.8rem;
+    }
+
+    /* Documents tab */
+    .doc-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .doc-stats {
+      font-size: 0.85rem;
+      color: #888;
+    }
+
+    .doc-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .doc-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #141414;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 12px 16px;
+    }
+
+    .doc-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .doc-name {
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+
+    .doc-meta {
+      font-size: 0.75rem;
+      color: #666;
+    }
+
+    .doc-preview {
+      font-size: 0.8rem;
+      color: #888;
+      margin-top: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .doc-actions {
+      margin-left: 16px;
+      flex-shrink: 0;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #666;
+    }
+
+    .empty-state p { margin-bottom: 16px; }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+
+    .file-group {
+      margin-bottom: 24px;
+    }
+
+    .file-group-header {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #aaa;
+      margin-bottom: 8px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid #1a1a1a;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>LinkedIn Post Agent — Admin</h1>
+    <div class="links">
+      <a href="linkedin-post-agent.html">Chat</a>
+      <a href="https://jellep.app.n8n.cloud/form/linkedin-upload" target="_blank">Upload documenten</a>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('prompt')">System Prompt</div>
+    <div class="tab" onclick="switchTab('tov')">Tone of Voice</div>
+    <div class="tab" onclick="switchTab('docs')">Documenten</div>
+  </div>
+
+  <div class="content">
+    <!-- System Prompt -->
+    <div class="panel active" id="panel-prompt">
+      <h2>System Prompt</h2>
+      <p class="description">Dit bepaalt het gedrag van de LinkedIn agent — wat hij moet doen, hoe hij posts structureert, en welke regels hij volgt.</p>
+      <textarea id="systemPrompt" placeholder="Laden..."></textarea>
+      <div class="save-bar">
+        <span class="status" id="status-prompt"></span>
+        <button class="btn" onclick="saveSettings('system_prompt', 'systemPrompt', 'status-prompt')">Opslaan</button>
+      </div>
+    </div>
+
+    <!-- Tone of Voice -->
+    <div class="panel" id="panel-tov">
+      <h2>Tone of Voice</h2>
+      <p class="description">Beschrijf hier expliciet jouw schrijfstijl, toon, en voorkeuren. Voeg voorbeelden toe van hoe je schrijft. De agent gebruikt dit bij elke post die hij genereert.</p>
+      <textarea id="toneOfVoice" placeholder="Laden..."></textarea>
+      <div class="save-bar">
+        <span class="status" id="status-tov"></span>
+        <button class="btn" onclick="saveSettings('tone_of_voice', 'toneOfVoice', 'status-tov')">Opslaan</button>
+      </div>
+    </div>
+
+    <!-- Documenten -->
+    <div class="panel" id="panel-docs">
+      <h2>Documenten</h2>
+      <p class="description">Je kennisbank met voorbeeldposts, templates en inspiratie. De agent gebruikt deze als referentie voor structuur en schrijfstijl.</p>
+
+      <div class="doc-header">
+        <span class="doc-stats" id="docStats">Laden...</span>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-small" onclick="loadDocuments()">Vernieuwen</button>
+          <a href="https://jellep.app.n8n.cloud/form/linkedin-upload" target="_blank" class="btn btn-small" style="text-decoration:none">+ Upload</a>
+        </div>
+      </div>
+
+      <div class="doc-list" id="docList">
+        <div class="loading">Documenten laden...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // CONFIGURATIE — Vul hier je Supabase gegevens in
+    // ============================================================
+    const SUPABASE_URL = 'https://sahhufradbbocsetgggt.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhaGh1ZnJhZGJib2NzZXRnZ2d0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5Mjc1NDMsImV4cCI6MjA4NjUwMzU0M30.kfPXeFLM8dyRND4GEH2BDtS4TfOYtgwAOXZiQM8g0mA';
+    // Te vinden in Supabase → Settings → Data API → anon public key
+    // ============================================================
+
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Tab switching
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+
+      const tabs = { prompt: 0, tov: 1, docs: 2 };
+      document.querySelectorAll('.tab')[tabs[tab]].classList.add('active');
+      document.getElementById(`panel-${tab}`).classList.add('active');
+
+      if (tab === 'docs') loadDocuments();
+    }
+
+    // Load settings
+    async function loadSettings() {
+      const { data, error } = await sb.from('settings').select('*');
+      if (error) {
+        console.error('Error loading settings:', error);
+        return;
+      }
+      for (const row of data) {
+        if (row.key === 'system_prompt') {
+          document.getElementById('systemPrompt').value = row.value;
+        } else if (row.key === 'tone_of_voice') {
+          document.getElementById('toneOfVoice').value = row.value;
+        }
+      }
+    }
+
+    // Save settings
+    async function saveSettings(key, textareaId, statusId) {
+      const statusEl = document.getElementById(statusId);
+      const value = document.getElementById(textareaId).value;
+
+      statusEl.textContent = 'Opslaan...';
+      statusEl.className = 'status saving';
+
+      const { error } = await sb
+        .from('settings')
+        .update({ value })
+        .eq('key', key);
+
+      if (error) {
+        statusEl.textContent = 'Fout bij opslaan: ' + error.message;
+        statusEl.className = 'status error';
+      } else {
+        statusEl.textContent = 'Opgeslagen';
+        statusEl.className = 'status saved';
+        setTimeout(() => { statusEl.textContent = ''; }, 3000);
+      }
+    }
+
+    // Load documents
+    async function loadDocuments() {
+      const listEl = document.getElementById('docList');
+      const statsEl = document.getElementById('docStats');
+      listEl.innerHTML = '<div class="loading">Documenten laden...</div>';
+
+      const { data, error, count } = await sb
+        .from('documents')
+        .select('id, content, metadata', { count: 'exact' })
+        .order('id', { ascending: false })
+        .limit(200);
+
+      if (error) {
+        listEl.innerHTML = `<div class="empty-state"><p>Fout: ${error.message}</p></div>`;
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        statsEl.textContent = '0 documenten';
+        listEl.innerHTML = `
+          <div class="empty-state">
+            <p>Nog geen documenten geupload.</p>
+            <a href="https://jellep.app.n8n.cloud/form/linkedin-upload" target="_blank" class="btn">Upload je eerste document</a>
+          </div>`;
+        return;
+      }
+
+      statsEl.textContent = `${count || data.length} chunks in de kennisbank`;
+
+      // Group by file name
+      const groups = {};
+      for (const doc of data) {
+        const fileName = doc.metadata?.['file-name'] || 'Onbekend bestand';
+        if (!groups[fileName]) groups[fileName] = [];
+        groups[fileName].push(doc);
+      }
+
+      let html = '';
+      for (const [fileName, docs] of Object.entries(groups)) {
+        const uploadDate = docs[0].metadata?.['upload-date']
+          ? new Date(docs[0].metadata['upload-date']).toLocaleDateString('nl-NL')
+          : '';
+
+        html += `<div class="file-group">`;
+        html += `<div class="file-group-header">${escapeHtml(fileName)} — ${docs.length} chunks ${uploadDate ? '— ' + uploadDate : ''} <button class="btn btn-danger btn-small" style="float:right" onclick="deleteFile('${escapeHtml(fileName)}')">Verwijder bestand</button></div>`;
+
+        for (const doc of docs.slice(0, 3)) {
+          const preview = (doc.content || '').substring(0, 120).replace(/\n/g, ' ');
+          html += `
+            <div class="doc-item">
+              <div class="doc-info">
+                <div class="doc-meta">Chunk #${doc.id}</div>
+                <div class="doc-preview">${escapeHtml(preview)}...</div>
+              </div>
+              <div class="doc-actions">
+                <button class="btn btn-danger btn-small" onclick="deleteChunk(${doc.id})">X</button>
+              </div>
+            </div>`;
+        }
+
+        if (docs.length > 3) {
+          html += `<div style="padding:8px 16px;color:#666;font-size:0.8rem">+ ${docs.length - 3} meer chunks van dit bestand</div>`;
+        }
+
+        html += `</div>`;
+      }
+
+      listEl.innerHTML = html;
+    }
+
+    // Delete single chunk
+    async function deleteChunk(id) {
+      if (!confirm('Weet je zeker dat je deze chunk wilt verwijderen?')) return;
+      const { error } = await sb.from('documents').delete().eq('id', id);
+      if (error) alert('Fout: ' + error.message);
+      else loadDocuments();
+    }
+
+    // Delete all chunks of a file
+    async function deleteFile(fileName) {
+      if (!confirm(`Weet je zeker dat je ALLE chunks van "${fileName}" wilt verwijderen?`)) return;
+      const { error } = await sb.from('documents').delete().filter('metadata->>file-name', 'eq', fileName);
+      if (error) alert('Fout: ' + error.message);
+      else loadDocuments();
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    // Init
+    loadSettings();
+  </script>
+</body>
+</html>
