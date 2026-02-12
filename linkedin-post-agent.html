@@ -174,9 +174,101 @@
       color: #0077B5;
       text-decoration: none;
     }
+    /* Login overlay */
+    .login-overlay {
+      position: fixed;
+      inset: 0;
+      background: #0a0a0a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .login-box {
+      background: #141414;
+      border: 1px solid #2a2a2a;
+      border-radius: 16px;
+      padding: 40px;
+      width: 100%;
+      max-width: 380px;
+      text-align: center;
+    }
+
+    .login-box h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #0077B5, #00a0dc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .login-box p {
+      color: #666;
+      font-size: 0.85rem;
+      margin-bottom: 24px;
+    }
+
+    .login-box input {
+      width: 100%;
+      background: #0a0a0a;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      color: #fafafa;
+      font-family: inherit;
+      font-size: 0.9rem;
+      padding: 10px 14px;
+      margin-bottom: 12px;
+      outline: none;
+    }
+
+    .login-box input:focus { border-color: #0077B5; }
+
+    .login-box button {
+      width: 100%;
+      background: #0077B5;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 4px;
+      transition: background 0.2s;
+    }
+
+    .login-box button:hover { background: #005f8f; }
+
+    .login-error {
+      color: #f44336;
+      font-size: 0.8rem;
+      margin-top: 12px;
+      display: none;
+    }
+
+    .app-content { display: none; }
+    .app-content.visible { display: flex; flex-direction: column; min-height: 100vh; }
   </style>
 </head>
 <body>
+
+  <!-- Login -->
+  <div class="login-overlay" id="loginOverlay">
+    <div class="login-box">
+      <h2>LinkedIn Post Agent</h2>
+      <p>Log in om verder te gaan</p>
+      <input type="text" id="loginUser" placeholder="Gebruikersnaam" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('loginPass').focus()">
+      <input type="password" id="loginPass" placeholder="Wachtwoord" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+      <button onclick="doLogin()">Inloggen</button>
+      <div class="login-error" id="loginError">Ongeldige gebruikersnaam of wachtwoord</div>
+    </div>
+  </div>
+
+  <div class="app-content" id="appContent">
 
   <div class="header">
     <h1>LinkedIn Post Agent</h1>
@@ -210,6 +302,42 @@ Je kunt me ook vragen om:
   <div class="footer">
     Powered by Claude &middot; <a href="#" id="uploadLink">Documenten uploaden</a>
   </div>
+
+  </div><!-- /app-content -->
+
+  <script>
+    // ============================================================
+    // AUTH — SHA-256 hashed credentials (plaintext never in code)
+    // Default: admin / linkedin2024
+    // ============================================================
+    const HASH_USER = '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918';
+    const HASH_PASS = '010f6f03f0850f30a50b3f485e40243be2e5d7c48e5c14661e4eb77b5a7c9563';
+
+    async function sha256(str) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function doLogin() {
+      const user = document.getElementById('loginUser').value.trim();
+      const pass = document.getElementById('loginPass').value;
+      const [hashU, hashP] = await Promise.all([sha256(user), sha256(pass)]);
+
+      if (hashU === HASH_USER && hashP === HASH_PASS) {
+        sessionStorage.setItem('authed', '1');
+        showApp();
+      } else {
+        document.getElementById('loginError').style.display = 'block';
+      }
+    }
+
+    function showApp() {
+      document.getElementById('loginOverlay').style.display = 'none';
+      document.getElementById('appContent').classList.add('visible');
+    }
+
+    if (sessionStorage.getItem('authed') === '1') showApp();
+  </script>
 
   <script>
     // ============================================================
