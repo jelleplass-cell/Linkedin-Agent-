@@ -15,18 +15,31 @@
       background: #0a0a0a;
       color: #fafafa;
       min-height: 100vh;
+    }
+
+    /* Login overlay */
+    .login-overlay {
+      position: fixed;
+      inset: 0;
+      background: #0a0a0a;
       display: flex;
-      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
     }
 
-    .header {
+    .login-box {
+      background: #141414;
+      border: 1px solid #2a2a2a;
+      border-radius: 16px;
+      padding: 40px;
+      width: 100%;
+      max-width: 380px;
       text-align: center;
-      padding: 40px 20px 24px;
-      border-bottom: 1px solid #1a1a1a;
     }
 
-    .header h1 {
-      font-size: 1.75rem;
+    .login-box h2 {
+      font-size: 1.25rem;
       font-weight: 700;
       margin-bottom: 8px;
       background: linear-gradient(135deg, #0077B5, #00a0dc);
@@ -35,34 +48,221 @@
       background-clip: text;
     }
 
+    .login-box p {
+      color: #666;
+      font-size: 0.85rem;
+      margin-bottom: 24px;
+    }
+
+    .login-box input {
+      width: 100%;
+      background: #0a0a0a;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      color: #fafafa;
+      font-family: inherit;
+      font-size: 0.9rem;
+      padding: 10px 14px;
+      margin-bottom: 12px;
+      outline: none;
+    }
+
+    .login-box input:focus { border-color: #0077B5; }
+
+    .login-box button {
+      width: 100%;
+      background: #0077B5;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 4px;
+      transition: background 0.2s;
+    }
+
+    .login-box button:hover { background: #005f8f; }
+
+    .login-error {
+      color: #f44336;
+      font-size: 0.8rem;
+      margin-top: 12px;
+      display: none;
+    }
+
+    .app-content { display: none; }
+    .app-content.visible { display: flex; height: 100vh; overflow: hidden; }
+
+    /* ====== Sidebar ====== */
+    .sidebar {
+      width: 260px;
+      min-width: 260px;
+      background: #111;
+      border-right: 1px solid #1a1a1a;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .sidebar-header {
+      padding: 16px;
+      border-bottom: 1px solid #1a1a1a;
+    }
+
+    .sidebar-header button {
+      width: 100%;
+      background: #0077B5;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .sidebar-header button:hover { background: #005f8f; }
+
+    .sidebar-links {
+      padding: 8px 16px;
+      border-bottom: 1px solid #1a1a1a;
+    }
+
+    .sidebar-links a {
+      color: #888;
+      text-decoration: none;
+      font-size: 0.8rem;
+      transition: color 0.2s;
+    }
+
+    .sidebar-links a:hover { color: #fafafa; }
+
+    .conversation-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 0;
+    }
+
+    .conversation-item {
+      display: flex;
+      align-items: center;
+      padding: 10px 16px;
+      cursor: pointer;
+      transition: background 0.15s;
+      position: relative;
+    }
+
+    .conversation-item:hover {
+      background: #1a1a1a;
+    }
+
+    .conversation-item.active {
+      background: #1a1a1a;
+      border-left: 3px solid #0077B5;
+      padding-left: 13px;
+    }
+
+    .conversation-item-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .conversation-item-title {
+      font-size: 0.82rem;
+      color: #e0e0e0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .conversation-item-date {
+      font-size: 0.7rem;
+      color: #555;
+      margin-top: 2px;
+    }
+
+    .conversation-item .delete-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: #666;
+      cursor: pointer;
+      font-size: 0.9rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: color 0.15s, background 0.15s;
+      flex-shrink: 0;
+      margin-left: 8px;
+    }
+
+    .conversation-item:hover .delete-btn {
+      display: block;
+    }
+
+    .conversation-item .delete-btn:hover {
+      color: #f44336;
+      background: rgba(244, 67, 54, 0.1);
+    }
+
+    .sidebar-empty {
+      padding: 20px 16px;
+      color: #555;
+      font-size: 0.8rem;
+      text-align: center;
+    }
+
+    /* ====== Main area ====== */
+    .main-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      height: 100vh;
+    }
+
+    .header {
+      text-align: center;
+      padding: 24px 20px 16px;
+      border-bottom: 1px solid #1a1a1a;
+    }
+
+    .header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      background: linear-gradient(135deg, #0077B5, #00a0dc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
     .header p {
       color: #888;
-      font-size: 0.95rem;
+      font-size: 0.85rem;
     }
 
-    .header-actions {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      margin-top: 12px;
-    }
-
-    .header-actions a, .header-actions button {
-      background: none;
+    /* Mobile hamburger */
+    .hamburger {
+      display: none;
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      z-index: 200;
+      background: #1a1a1a;
       border: 1px solid #2a2a2a;
-      border-radius: 6px;
-      color: #888;
-      font-family: inherit;
-      font-size: 0.8rem;
-      padding: 6px 14px;
-      cursor: pointer;
-      text-decoration: none;
-      transition: all 0.2s;
-    }
-
-    .header-actions a:hover, .header-actions button:hover {
+      border-radius: 8px;
       color: #fafafa;
-      border-color: #444;
+      width: 40px;
+      height: 40px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
     }
 
     .chat-container {
@@ -73,6 +273,7 @@
       width: 100%;
       margin: 0 auto;
       padding: 0 16px;
+      min-height: 0;
     }
 
     .messages {
@@ -199,84 +400,42 @@
       color: #0077B5;
       text-decoration: none;
     }
-    /* Login overlay */
-    .login-overlay {
+
+    /* Sidebar overlay for mobile */
+    .sidebar-overlay {
+      display: none;
       position: fixed;
       inset: 0;
-      background: #0a0a0a;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
+      background: rgba(0,0,0,0.6);
+      z-index: 99;
     }
 
-    .login-box {
-      background: #141414;
-      border: 1px solid #2a2a2a;
-      border-radius: 16px;
-      padding: 40px;
-      width: 100%;
-      max-width: 380px;
-      text-align: center;
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+      .hamburger {
+        display: flex;
+      }
+
+      .sidebar {
+        position: fixed;
+        left: -260px;
+        top: 0;
+        z-index: 100;
+        transition: left 0.25s ease;
+      }
+
+      .sidebar.open {
+        left: 0;
+      }
+
+      .sidebar.open ~ .sidebar-overlay {
+        display: block;
+      }
+
+      .header {
+        padding-top: 56px;
+      }
     }
-
-    .login-box h2 {
-      font-size: 1.25rem;
-      font-weight: 700;
-      margin-bottom: 8px;
-      background: linear-gradient(135deg, #0077B5, #00a0dc);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .login-box p {
-      color: #666;
-      font-size: 0.85rem;
-      margin-bottom: 24px;
-    }
-
-    .login-box input {
-      width: 100%;
-      background: #0a0a0a;
-      border: 1px solid #2a2a2a;
-      border-radius: 8px;
-      color: #fafafa;
-      font-family: inherit;
-      font-size: 0.9rem;
-      padding: 10px 14px;
-      margin-bottom: 12px;
-      outline: none;
-    }
-
-    .login-box input:focus { border-color: #0077B5; }
-
-    .login-box button {
-      width: 100%;
-      background: #0077B5;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 10px;
-      font-family: inherit;
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 4px;
-      transition: background 0.2s;
-    }
-
-    .login-box button:hover { background: #005f8f; }
-
-    .login-error {
-      color: #f44336;
-      font-size: 0.8rem;
-      margin-top: 12px;
-      display: none;
-    }
-
-    .app-content { display: none; }
-    .app-content.visible { display: flex; flex-direction: column; min-height: 100vh; }
   </style>
 </head>
 <body>
@@ -295,42 +454,50 @@
 
   <div class="app-content" id="appContent">
 
-  <div class="header">
-    <h1>LinkedIn Post Agent</h1>
-    <p>Schrijf engaging LinkedIn posts in jouw stijl met AI</p>
-    <div class="header-actions">
-      <button onclick="newConversation()">Nieuw gesprek</button>
-      <a href="/admin">Admin</a>
-    </div>
-  </div>
+    <!-- Mobile hamburger -->
+    <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()">&#9776;</button>
 
-  <div class="chat-container">
-    <div class="messages" id="messages">
-      <div class="message assistant">Hallo! Ik ben je LinkedIn Post Agent. Vertel me waar je een post over wilt schrijven, en ik maak een engaging LinkedIn post in jouw stijl.
-
-Je kunt me ook vragen om:
-- Een post te herschrijven in een andere toon
-- Meerdere hook-varianten te genereren
-- Een post korter of langer te maken</div>
-    </div>
-
-    <div class="input-area">
-      <div class="input-wrapper">
-        <textarea
-          id="userInput"
-          rows="1"
-          placeholder="Waar wil je een LinkedIn post over schrijven?"
-          onkeydown="handleKeyDown(event)"
-          oninput="autoResize(this)"
-        ></textarea>
-        <button id="sendBtn" onclick="sendMessage()">Verstuur</button>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <button onclick="newConversation()">+ Nieuw gesprek</button>
       </div>
-    </div>
-  </div>
+      <div class="sidebar-links">
+        <a href="/admin">Admin paneel</a>
+      </div>
+      <div class="conversation-list" id="conversationList"></div>
+    </aside>
 
-  <div class="footer">
-    Powered by Claude &middot; <a href="#" id="uploadLink">Documenten uploaden</a>
-  </div>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- Main chat area -->
+    <main class="main-area">
+      <div class="header">
+        <h1>LinkedIn Post Agent</h1>
+        <p>Schrijf engaging LinkedIn posts in jouw stijl met AI</p>
+      </div>
+
+      <div class="chat-container">
+        <div class="messages" id="messages"></div>
+
+        <div class="input-area">
+          <div class="input-wrapper">
+            <textarea
+              id="userInput"
+              rows="1"
+              placeholder="Waar wil je een LinkedIn post over schrijven?"
+              onkeydown="handleKeyDown(event)"
+              oninput="autoResize(this)"
+            ></textarea>
+            <button id="sendBtn" onclick="sendMessage()">Verstuur</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        Powered by Claude &middot; <a href="#" id="uploadLink">Documenten uploaden</a>
+      </div>
+    </main>
 
   </div><!-- /app-content -->
 
@@ -374,54 +541,205 @@ Je kunt me ook vragen om:
     // ============================================================
     const WEBHOOK_URL = 'https://jellep.app.n8n.cloud/webhook/linkedin-chat/chat';
     const UPLOAD_URL = 'https://jellep.app.n8n.cloud/form/linkedin-upload';
+    const WELCOME_MSG = 'Hallo! Ik ben je LinkedIn Post Agent. Vertel me waar je een post over wilt schrijven, en ik maak een engaging LinkedIn post in jouw stijl.\n\nJe kunt me ook vragen om:\n- Een post te herschrijven in een andere toon\n- Meerdere hook-varianten te genereren\n- Een post korter of langer te maken';
     // ============================================================
 
-    // Persistent session — same sessionId keeps n8n chat memory intact
-    let sessionId = localStorage.getItem('chatSessionId');
-    if (!sessionId) {
-      sessionId = crypto.randomUUID();
-      localStorage.setItem('chatSessionId', sessionId);
-    }
-
     let isLoading = false;
-    let chatHistory = JSON.parse(localStorage.getItem('chatHistory') || '[]');
 
     // Set upload link
     document.getElementById('uploadLink').href = UPLOAD_URL;
 
-    // Restore previous messages on load
-    function restoreMessages() {
-      if (chatHistory.length === 0) return;
-      const container = document.getElementById('messages');
-      // Remove default welcome message
-      container.innerHTML = '';
-      for (const msg of chatHistory) {
-        const div = document.createElement('div');
-        div.className = `message ${msg.role}`;
-        div.textContent = msg.text;
-        container.appendChild(div);
-      }
-      container.scrollTop = container.scrollHeight;
+    // ============================================================
+    // CONVERSATION DATA MODEL
+    // ============================================================
+    // conversations: [{id, title, sessionId, messages: [{role, text}], updatedAt}]
+    // activeConversationId: string
+    // ============================================================
+
+    function loadConversations() {
+      return JSON.parse(localStorage.getItem('conversations') || '[]');
     }
 
-    function saveHistory() {
-      localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+    function saveConversations(convos) {
+      localStorage.setItem('conversations', JSON.stringify(convos));
+    }
+
+    function getActiveId() {
+      return localStorage.getItem('activeConversationId');
+    }
+
+    function setActiveId(id) {
+      localStorage.setItem('activeConversationId', id);
+    }
+
+    function getActiveConversation() {
+      const convos = loadConversations();
+      const id = getActiveId();
+      return convos.find(c => c.id === id) || null;
+    }
+
+    // ============================================================
+    // MIGRATE from old single-conversation format
+    // ============================================================
+    function migrateOldFormat() {
+      if (localStorage.getItem('conversations')) return; // already migrated
+
+      const oldHistory = JSON.parse(localStorage.getItem('chatHistory') || '[]');
+      const oldSessionId = localStorage.getItem('chatSessionId');
+
+      if (oldHistory.length > 0 && oldSessionId) {
+        const title = oldHistory.find(m => m.role === 'user')?.text.slice(0, 50) || 'Gesprek';
+        const convo = {
+          id: crypto.randomUUID(),
+          title: title,
+          sessionId: oldSessionId,
+          messages: oldHistory,
+          updatedAt: Date.now()
+        };
+        saveConversations([convo]);
+        setActiveId(convo.id);
+      }
+
+      // Clean up old keys
+      localStorage.removeItem('chatHistory');
+      localStorage.removeItem('chatSessionId');
+    }
+
+    // ============================================================
+    // SIDEBAR RENDERING
+    // ============================================================
+    function renderSidebar() {
+      const list = document.getElementById('conversationList');
+      const convos = loadConversations();
+      const activeId = getActiveId();
+
+      if (convos.length === 0) {
+        list.innerHTML = '<div class="sidebar-empty">Nog geen gesprekken</div>';
+        return;
+      }
+
+      // Sort by updatedAt descending
+      convos.sort((a, b) => b.updatedAt - a.updatedAt);
+
+      list.innerHTML = convos.map(c => {
+        const isActive = c.id === activeId;
+        const date = formatRelativeDate(c.updatedAt);
+        return `<div class="conversation-item${isActive ? ' active' : ''}" onclick="switchConversation('${c.id}')">
+          <div class="conversation-item-content">
+            <div class="conversation-item-title">${escapeHtml(c.title)}</div>
+            <div class="conversation-item-date">${date}</div>
+          </div>
+          <button class="delete-btn" onclick="event.stopPropagation(); deleteConversation('${c.id}')" title="Verwijderen">&times;</button>
+        </div>`;
+      }).join('');
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function formatRelativeDate(ts) {
+      const diff = Date.now() - ts;
+      const mins = Math.floor(diff / 60000);
+      if (mins < 1) return 'Zojuist';
+      if (mins < 60) return `${mins} min geleden`;
+      const hours = Math.floor(mins / 60);
+      if (hours < 24) return `${hours} uur geleden`;
+      const days = Math.floor(hours / 24);
+      if (days < 7) return `${days} dag${days > 1 ? 'en' : ''} geleden`;
+      const d = new Date(ts);
+      return d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' });
+    }
+
+    // ============================================================
+    // CONVERSATION MANAGEMENT
+    // ============================================================
+    function switchConversation(id) {
+      setActiveId(id);
+      renderSidebar();
+      renderMessages();
+      closeSidebarOnMobile();
     }
 
     function newConversation() {
-      if (chatHistory.length > 0 && !confirm('Huidig gesprek wissen en opnieuw beginnen?')) return;
-      chatHistory = [];
-      localStorage.removeItem('chatHistory');
-      sessionId = crypto.randomUUID();
-      localStorage.setItem('chatSessionId', sessionId);
-      const container = document.getElementById('messages');
-      container.innerHTML = '';
-      const div = document.createElement('div');
-      div.className = 'message assistant';
-      div.textContent = 'Hallo! Ik ben je LinkedIn Post Agent. Vertel me waar je een post over wilt schrijven, en ik maak een engaging LinkedIn post in jouw stijl.\n\nJe kunt me ook vragen om:\n- Een post te herschrijven in een andere toon\n- Meerdere hook-varianten te genereren\n- Een post korter of langer te maken';
-      container.appendChild(div);
+      const convo = {
+        id: crypto.randomUUID(),
+        title: 'Nieuw gesprek',
+        sessionId: crypto.randomUUID(),
+        messages: [],
+        updatedAt: Date.now()
+      };
+      const convos = loadConversations();
+      convos.unshift(convo);
+      saveConversations(convos);
+      setActiveId(convo.id);
+      renderSidebar();
+      renderMessages();
+      closeSidebarOnMobile();
+      document.getElementById('userInput').focus();
     }
 
+    function deleteConversation(id) {
+      let convos = loadConversations();
+      convos = convos.filter(c => c.id !== id);
+      saveConversations(convos);
+
+      if (getActiveId() === id) {
+        if (convos.length > 0) {
+          convos.sort((a, b) => b.updatedAt - a.updatedAt);
+          setActiveId(convos[0].id);
+        } else {
+          localStorage.removeItem('activeConversationId');
+        }
+      }
+
+      renderSidebar();
+      renderMessages();
+    }
+
+    function saveCurrentMessages() {
+      const convo = getActiveConversation();
+      if (!convo) return;
+      const convos = loadConversations();
+      const idx = convos.findIndex(c => c.id === convo.id);
+      if (idx !== -1) {
+        convos[idx] = convo;
+        saveConversations(convos);
+      }
+    }
+
+    // ============================================================
+    // MESSAGE RENDERING
+    // ============================================================
+    function renderMessages() {
+      const container = document.getElementById('messages');
+      const convo = getActiveConversation();
+
+      container.innerHTML = '';
+
+      // Always show welcome message first
+      const welcome = document.createElement('div');
+      welcome.className = 'message assistant';
+      welcome.textContent = WELCOME_MSG;
+      container.appendChild(welcome);
+
+      if (convo && convo.messages.length > 0) {
+        for (const msg of convo.messages) {
+          const div = document.createElement('div');
+          div.className = `message ${msg.role}`;
+          div.textContent = msg.text;
+          container.appendChild(div);
+        }
+      }
+
+      container.scrollTop = container.scrollHeight;
+    }
+
+    // ============================================================
+    // CHAT FUNCTIONS
+    // ============================================================
     function autoResize(textarea) {
       textarea.style.height = 'auto';
       textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
@@ -466,10 +784,28 @@ Je kunt me ook vragen om:
 
       if (!text || isLoading) return;
 
-      // Add user message + save
+      // Ensure there's an active conversation
+      let convo = getActiveConversation();
+      if (!convo) {
+        newConversation();
+        convo = getActiveConversation();
+      }
+
+      // Add user message to UI
       addMessage(text, 'user');
-      chatHistory.push({ role: 'user', text });
-      saveHistory();
+
+      // Save to conversation data
+      convo.messages.push({ role: 'user', text });
+      convo.updatedAt = Date.now();
+
+      // Auto-title from first user message
+      if (convo.messages.filter(m => m.role === 'user').length === 1) {
+        convo.title = text.slice(0, 50);
+      }
+
+      saveCurrentMessagesFromConvo(convo);
+      renderSidebar();
+
       input.value = '';
       input.style.height = 'auto';
 
@@ -488,7 +824,7 @@ Je kunt me ook vragen om:
           },
           body: JSON.stringify({
             action: 'sendMessage',
-            sessionId: sessionId,
+            sessionId: convo.sessionId,
             chatInput: text
           }),
           signal: controller.signal
@@ -502,8 +838,11 @@ Je kunt me ook vragen om:
         const data = await response.json();
         const reply = data.output || data.text || data.response || JSON.stringify(data);
         addMessage(reply, 'assistant');
-        chatHistory.push({ role: 'assistant', text: reply });
-        saveHistory();
+
+        convo.messages.push({ role: 'assistant', text: reply });
+        convo.updatedAt = Date.now();
+        saveCurrentMessagesFromConvo(convo);
+        renderSidebar();
 
       } catch (error) {
         removeLoadingMessage();
@@ -516,8 +855,50 @@ Je kunt me ook vragen om:
       input.focus();
     }
 
-    // Init: restore previous conversation
-    restoreMessages();
+    function saveCurrentMessagesFromConvo(convo) {
+      const convos = loadConversations();
+      const idx = convos.findIndex(c => c.id === convo.id);
+      if (idx !== -1) {
+        convos[idx] = convo;
+      }
+      saveConversations(convos);
+    }
+
+    // ============================================================
+    // MOBILE SIDEBAR TOGGLE
+    // ============================================================
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      sidebar.classList.toggle('open');
+      overlay.style.display = sidebar.classList.contains('open') ? 'block' : 'none';
+    }
+
+    function closeSidebarOnMobile() {
+      if (window.innerWidth <= 768) {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        sidebar.classList.remove('open');
+        overlay.style.display = 'none';
+      }
+    }
+
+    // ============================================================
+    // INIT
+    // ============================================================
+    migrateOldFormat();
+
+    // If no conversations yet and none active, start fresh
+    const convos = loadConversations();
+    if (convos.length === 0) {
+      newConversation();
+    } else if (!getActiveId() || !convos.find(c => c.id === getActiveId())) {
+      convos.sort((a, b) => b.updatedAt - a.updatedAt);
+      setActiveId(convos[0].id);
+    }
+
+    renderSidebar();
+    renderMessages();
   </script>
 </body>
 </html>
