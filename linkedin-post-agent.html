@@ -40,6 +40,31 @@
       font-size: 0.95rem;
     }
 
+    .header-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 12px;
+    }
+
+    .header-actions a, .header-actions button {
+      background: none;
+      border: 1px solid #2a2a2a;
+      border-radius: 6px;
+      color: #888;
+      font-family: inherit;
+      font-size: 0.8rem;
+      padding: 6px 14px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .header-actions a:hover, .header-actions button:hover {
+      color: #fafafa;
+      border-color: #444;
+    }
+
     .chat-container {
       flex: 1;
       display: flex;
@@ -273,6 +298,10 @@
   <div class="header">
     <h1>LinkedIn Post Agent</h1>
     <p>Schrijf engaging LinkedIn posts in jouw stijl met AI</p>
+    <div class="header-actions">
+      <button onclick="newConversation()">Nieuw gesprek</button>
+      <a href="/admin">Admin</a>
+    </div>
   </div>
 
   <div class="chat-container">
@@ -324,7 +353,7 @@ Je kunt me ook vragen om:
       const [hashU, hashP] = await Promise.all([sha256(user), sha256(pass)]);
 
       if (hashU === HASH_USER && hashP === HASH_PASS) {
-        sessionStorage.setItem('authed', '1');
+        localStorage.setItem('authed', '1');
         showApp();
       } else {
         document.getElementById('loginError').style.display = 'block';
@@ -336,24 +365,62 @@ Je kunt me ook vragen om:
       document.getElementById('appContent').classList.add('visible');
     }
 
-    if (sessionStorage.getItem('authed') === '1') showApp();
+    if (localStorage.getItem('authed') === '1') showApp();
   </script>
 
   <script>
     // ============================================================
-    // CONFIGURATIE — Pas deze URL aan na het activeren van je n8n workflow
+    // CONFIGURATIE
     // ============================================================
     const WEBHOOK_URL = 'https://jellep.app.n8n.cloud/webhook/linkedin-chat/chat';
-
-    // Form trigger URL voor document uploads
     const UPLOAD_URL = 'https://jellep.app.n8n.cloud/form/linkedin-upload';
     // ============================================================
 
-    let sessionId = crypto.randomUUID();
+    // Persistent session — same sessionId keeps n8n chat memory intact
+    let sessionId = localStorage.getItem('chatSessionId');
+    if (!sessionId) {
+      sessionId = crypto.randomUUID();
+      localStorage.setItem('chatSessionId', sessionId);
+    }
+
     let isLoading = false;
+    let chatHistory = JSON.parse(localStorage.getItem('chatHistory') || '[]');
 
     // Set upload link
     document.getElementById('uploadLink').href = UPLOAD_URL;
+
+    // Restore previous messages on load
+    function restoreMessages() {
+      if (chatHistory.length === 0) return;
+      const container = document.getElementById('messages');
+      // Remove default welcome message
+      container.innerHTML = '';
+      for (const msg of chatHistory) {
+        const div = document.createElement('div');
+        div.className = `message ${msg.role}`;
+        div.textContent = msg.text;
+        container.appendChild(div);
+      }
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function saveHistory() {
+      localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+    }
+
+    function newConversation() {
+      if (chatHistory.length > 0 && !confirm('Huidig gesprek wissen en opnieuw beginnen?')) return;
+      chatHistory = [];
+      localStorage.removeItem('chatHistory');
+      sessionId = crypto.randomUUID();
+      localStorage.setItem('chatSessionId', sessionId);
+      const container = document.getElementById('messages');
+      container.innerHTML = '';
+      const div = document.createElement('div');
+      div.className = 'message assistant';
+      div.textContent = 'Hallo! Ik ben je LinkedIn Post Agent. Vertel me waar je een post over wilt schrijven, en ik maak een engaging LinkedIn post in jouw stijl.\n\nJe kunt me ook vragen om:\n- Een post te herschrijven in een andere toon\n- Meerdere hook-varianten te genereren\n- Een post korter of langer te maken';
+      container.appendChild(div);
+    }
 
     function autoResize(textarea) {
       textarea.style.height = 'auto';
@@ -399,16 +466,15 @@ Je kunt me ook vragen om:
 
       if (!text || isLoading) return;
 
-      // Add user message
+      // Add user message + save
       addMessage(text, 'user');
+      chatHistory.push({ role: 'user', text });
+      saveHistory();
       input.value = '';
       input.style.height = 'auto';
 
-      // Disable input
       isLoading = true;
       btn.disabled = true;
-
-      // Show loading
       addLoadingMessage();
 
       try {
@@ -427,15 +493,13 @@ Je kunt me ook vragen om:
 
         removeLoadingMessage();
 
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
         const data = await response.json();
-
-        // n8n chat trigger returns the response in the 'output' field
         const reply = data.output || data.text || data.response || JSON.stringify(data);
         addMessage(reply, 'assistant');
+        chatHistory.push({ role: 'assistant', text: reply });
+        saveHistory();
 
       } catch (error) {
         removeLoadingMessage();
@@ -443,11 +507,13 @@ Je kunt me ook vragen om:
         console.error('Chat error:', error);
       }
 
-      // Re-enable input
       isLoading = false;
       btn.disabled = false;
       input.focus();
     }
+
+    // Init: restore previous conversation
+    restoreMessages();
   </script>
 </body>
 </html>

@@ -400,7 +400,7 @@
       const [hashU, hashP] = await Promise.all([sha256(user), sha256(pass)]);
 
       if (hashU === HASH_USER && hashP === HASH_PASS) {
-        sessionStorage.setItem('authed', '1');
+        localStorage.setItem('authed', '1');
         showApp();
       } else {
         document.getElementById('loginError').style.display = 'block';
@@ -412,7 +412,7 @@
       document.getElementById('appContent').classList.add('visible');
     }
 
-    if (sessionStorage.getItem('authed') === '1') showApp();
+    if (localStorage.getItem('authed') === '1') showApp();
   </script>
 
   <script>
